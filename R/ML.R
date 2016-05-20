@@ -125,15 +125,15 @@ ML <- function(bigdata, dir=default.dir, subsetCutoff=default.subsetCutoff, spli
   # Thread package on all data ##
   ################################
 
-
-  require("pryr")
-  doMC::registerDoMC(varList$cores)
+  #doMC::registerDoMC(varList$cores)
+  cl <- snow::makeCluster(varList$cores, type="SOCK")
+  doSNOW::registerDoSNOW(cl)
   rm(varList)
   gc(reset=T)
   mallinfo::malloc.trim()
   require(foreach)
-  test=foreach::foreach(y=seq(1:length(files))) %dopar% {
-    print(paste("in PARA ", (mem_used()/1024)/1024," mb used.", sep=''))
+  parallelResult=foreach::foreach(y=seq(1:length(files))) %dopar% {
+    print(paste("in PARA ", (pryr::mem_used()/1024)/1024," mb used.", sep=''))
     applyModels(y,files, analyticalVariables, selectedMissingData,
       selectedNormalization, metaVariables, selectedTransformation,
       selectedStandardization, splitCol, classifierClass,
@@ -141,6 +141,7 @@ ML <- function(bigdata, dir=default.dir, subsetCutoff=default.subsetCutoff, spli
       removeOutliers,controlVariable,controlValue, classModel,
       skew, kurto,selectedTrainingSize,createPlots,factors)
   }
+  snow::stopCluster(cl)
 
 
   return (T)

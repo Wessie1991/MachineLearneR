@@ -27,7 +27,9 @@ Imports:
     robustfa,
     GPArotation,
     FactoMineR,
-    doMC
+    snow,
+    pryr,
+    mallinfo
 License: What license is it under?
 LazyData: TRUE
 RoxygenNote: 5.0.1

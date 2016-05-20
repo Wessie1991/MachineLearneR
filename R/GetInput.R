@@ -76,8 +76,11 @@ GetInput <- function(mydata, dir, subsetCutoff,splitCol, usedCores,
   mydata <- mydata[,x]
 
   # Split the files parallel.
-  doMC::registerDoMC(cores=cores)
+  #doMC::registerDoMC(cores=cores)
+  cl <- snow::makeCluster(cores, type="SOCK")
+  doSNOW::registerDoSNOW(cl)
   files <- as.character(plyr::dlply(mydata, match(splitCol, names(mydata)), Filesplit, splitCol, .parallel = TRUE))
+  snow::stopCluster(cl)
   returnList <- list(samp=samp,files=files,splitCol=splitCol,analyticalVariables=garbageList$analyticalVariables,cores=cores,
                      garbagedf=garbageList$garbageDf, metaVariables=metaVariables, colSumsBigdata=colSums(mydata[,garbageList$analyticalVariables],na.rm=T))
   return(returnList)

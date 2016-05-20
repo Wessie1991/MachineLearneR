@@ -32,12 +32,11 @@ applyModels <- function(i, files, analyticalVariables, selectedMissingData,
                      removeOutliers,controlVariable,controlValue, classModel,
                      skew, kurto,selectedTrainingSize, createPlots, factors) {
   # i is a index for the vector containing the subsset files.
-  require("pryr")
+
   load(files[i])
 
   ## Apply data manipulation model
-  print(paste('xSet ', (object.size(xSet)/1024)/1024," mb used.", sep=''))
-  print(paste("Voor DMM ", (mem_used()/1024)/1024," mb used.", sep=''))
+  print(paste("Voor DMM ", (pryr::mem_used()/1024)/1024," mb used.", sep=''))
 
   varList <- dMM(mydata=xSet, analyticalVariables = analyticalVariables, selectedNormalization=selectedNormalization,
                    selectedAverage=selectedAverage, selectedTransformation=selectedTransformation, selectedStandardization=selectedStandardization, splitCol=splitCol,
@@ -49,7 +48,7 @@ applyModels <- function(i, files, analyticalVariables, selectedMissingData,
   rm(xSet)
   gc()
   mallinfo::malloc.trim()
-  print(paste("Na DMM ", (mem_used()/1024)/1024," mb used.", sep=''))
+  print(paste("Na DMM ", (pryr::mem_used()/1024)/1024," mb used.", sep=''))
   #
   #
   # ## Apply multiple imputation model
@@ -63,7 +62,7 @@ applyModels <- function(i, files, analyticalVariables, selectedMissingData,
   varList$mydata <- data.frame( varList$mydata[,metaVariables], applyFactorLoadingModel(varList$mydata[,analyticalVariables],
                                   solution=factorList, factorNames=factorList$factorNames ,faMethodScores=faMethodScores))
 
-  print(paste("Na fa ", (mem_used()/1024)/1024," mb used.", sep=''))
+  print(paste("Na fa ", (pryr::mem_used()/1024)/1024," mb used.", sep=''))
 
 
   #### Maak eeen optie om de analytical vars te onthouden defeault is false
@@ -72,7 +71,7 @@ applyModels <- function(i, files, analyticalVariables, selectedMissingData,
   modelFit <- createClassModel(mydata=varList$mydata, selectedTrainingSize=selectedTrainingSize, classifierClass=classifierClass,
                    analyticalVariables=factors ,  createPlots=createPlots, fit=classModel, parallelIter = i, cores=1, multiThreadFase=T)
 
-  print(paste("Na class ", (mem_used()/1024)/1024," mb used.", sep=''))
+  print(paste("Na class ", (pryr::mem_used()/1024)/1024," mb used.", sep=''))
 
 
 }
