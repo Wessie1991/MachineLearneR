@@ -126,7 +126,7 @@ ML <- function(bigdata, dir=default.dir, subsetCutoff=default.subsetCutoff, spli
   ################################
 
   #doMC::registerDoMC(varList$cores)
-  cl <- snow::makeCluster(varList$cores, type="SOCK")
+  cl <- snow::makeCluster(varList$cores)
   doSNOW::registerDoSNOW(cl)
   rm(varList)
   gc(reset=T)

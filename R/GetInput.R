@@ -77,7 +77,7 @@ GetInput <- function(mydata, dir, subsetCutoff,splitCol, usedCores,
 
   # Split the files parallel.
   #doMC::registerDoMC(cores=cores)
-  cl <- snow::makeCluster(cores, type="SOCK")
+  cl <- snow::makeCluster(cores)
   doSNOW::registerDoSNOW(cl)
   files <- as.character(plyr::dlply(mydata, match(splitCol, names(mydata)), Filesplit, splitCol, .parallel = TRUE))
   snow::stopCluster(cl)
