@@ -48,6 +48,7 @@ applyModels <- function(i, files, analyticalVariables, selectedMissingData,
   rm(xSet)
   gc()
   mallinfo::malloc.trim()
+
   print(paste("Na DMM ", (pryr::mem_used()/1024)/1024," mb used.", sep=''))
   #
   #
@@ -56,9 +57,8 @@ applyModels <- function(i, files, analyticalVariables, selectedMissingData,
     varList$mydata <- cMIM(mydata=varList$mydata,analyticalVariables=analyticalVariables, selectedMissingData=selectedMissingData,
                       metaVariables=metaVariables, classifierClass=classifierClass, removeCata=removeCata)
   }
-  # print(paste("Na imputen ", (mem_used()/1024)/1024," mb used.", sep=''))
+
   # ## Apply factor loading model
-  # #varList$mydata[,-metaVariables] <- applyFactorLoadingModel(varList$mydata[,-metaVariables], covlist=factorList$covList, solution=factorList, factorNames=factorList$factorNames)
   varList$mydata <- data.frame( varList$mydata[,metaVariables], applyFactorLoadingModel(varList$mydata[,analyticalVariables],
                                   solution=factorList, factorNames=factorList$factorNames ,faMethodScores=faMethodScores))
 
