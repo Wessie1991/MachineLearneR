@@ -1,0 +1,35 @@
+Package: MachineLearneR
+Type: Package
+Title: Parallel Machine Learning Automation Framework
+Version: 0.1
+Date: 2016-03-10
+Author: W. Omta, D. Robers, S. van Apeldoorn, J. de Nobel
+Maintainer: <machinelearnerpackage@gmail.com>
+Description: This package presents a framework for the automation of serveral machine learning methods, speeding up the process by using multi threading.
+Imports:
+    parallel,
+    caret,
+    ggplot2,
+    randomForest,
+    data.table,
+    doSNOW,
+    stringr,
+    plyr,foreach,
+    modeest,
+    mice,
+    sampling,
+    zoo,
+    snowfall,
+    e1071,
+    moments,
+    rrcov,
+    psych,
+    robustfa,
+    GPArotation,
+    FactoMineR
+License: What license is it under?
+LazyData: TRUE
+RoxygenNote: 5.0.1
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr
