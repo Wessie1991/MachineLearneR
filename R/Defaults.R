@@ -4,7 +4,7 @@
 # This file contains the default values for all input parameters and their ranges
 
 #### Loader + Excluded Variables(garbage)
-default.dir= "/home/anarchist/Desktop/BPSYS/temp"  #getwd()
+default.dir= getwd() #"/home/anarchist/Desktop/BPSYS/temp"  #getwd()
 
 default.subsetCutoff=10000
 range.subsetCutoff=c(100,100000) # Check
