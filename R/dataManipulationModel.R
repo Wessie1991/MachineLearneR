@@ -25,6 +25,8 @@ dMM <- function(mydata, analyticalVariables, selectedNormalization, selectedAver
                 selectedTransformation, selectedStandardization, removeOutliers,
                 splitCol, controlVariable, controlValue, multiThreadFase, kurto, skew)
 {
+
+
   #################
   # Normalization #
   #################
@@ -32,10 +34,13 @@ dMM <- function(mydata, analyticalVariables, selectedNormalization, selectedAver
   # als deze niet in analyticalVariables zitten.
   colsum <- colSums(mydata[,analyticalVariables])
   missingFieldsBefore=sum(is.na(mydata[,analyticalVariables]))
+  gc()
+  mallinfo::malloc.trim()
+  print(paste("in de manupulatie", (mem_used()/1024)/1024, "mb used.", sep=' '))
   if (selectedNormalization=="normalize") {
     print(paste("Applying", selectedAverage, "normalization."))
     averageData <- apply(mydata[,analyticalVariables], 2, eval(parse(text=selectedAverage)), na.rm=TRUE)
-   # print(paste("The following", selectedAverage, "average has been calculated for each column:"))
+    #print(paste("The following", selectedAverage, "average has been calculated for each column:"))
     #print(paste(analyticalVariables, ":", averageData))
     mydata[,analyticalVariables] <- sapply(analyticalVariables, function(x) normalize(x, mydata[,x], averageData))
     logDF<- as.data.frame(averageData)
@@ -48,42 +53,34 @@ dMM <- function(mydata, analyticalVariables, selectedNormalization, selectedAver
     print(paste("The following", selectedAverage, "average has been calculated for each column for each splitcol subset:"))
     #mydata[splitColRows,analyticalVariables]
     logDF <- data.frame(row.names = analyticalVariables)
-    for (value in splitColValues) {
-      splitColRows <- which(mydata[,splitCol]==value)
-      averageSubset <- apply(mydata[splitColRows,analyticalVariables], 2,  eval(parse(text=selectedAverage)), na.rm=TRUE)
-      mydata[splitColRows,analyticalVariables] <- sapply(analyticalVariables, function(x) normalize(x, mydata[splitColRows,x], averageSubset))
-      logDF <- cbind(logDF,as.data.frame(averageSubset))
-    }
-    splitColValues <- paste(splitCol, splitColValues, sep = ":" )
-    colnames(logDF) <- splitColValues
+    listData <- lapply(splitColValues, function(Value) splitColNormalize(Value, mydata, splitCol, selectedAverage, analyticalVariables, logDF) )
+    mydata[,analyticalVariables] = do.call(rbind, lapply(1:length(listData), function(x) return(listData[[x]]$mydata)))
+    logDF <- do.call(cbind,lapply(1:length(listData), function(x) return(listData[[x]]$logDF)))
+    colnames(logDF) <- paste("normalizationSplitColValue", splitColValues, sep = "-" )
+
   } else if (selectedNormalization=="normalize.onClass") {
     print(paste("Applying", selectedAverage, "normalization on class", controlVariable))
     classSubset <- mydata[mydata[controlVariable] == controlValue,][,analyticalVariables]
     averageClassSubset <- apply(classSubset, 2, eval(parse(text=selectedAverage)), na.rm=TRUE)
     print(paste("The following", selectedAverage, "average has been calculated for each column in the class", controlVariable, "with value", controlValue))
     mydata[,analyticalVariables] <- sapply(analyticalVariables, function(x) normalize(x, mydata[,x], averageClassSubset))
-    rowNames <- paste(analyticalVariables,"OnControlValue" ,controlValue, sep = "-" )
+    rowNames <- paste(analyticalVariables,"OnControlValue", controlValue, sep = "-" )
     logDF <- data.frame(averageClassSubset, row.names = rowNames)
     colnames(logDF) <- "normalization_value"
 
-    } else if (selectedNormalization == "normalize.onClass.splitCol") {
+  } else if (selectedNormalization == "normalize.onClass.splitCol") {
+
+    print(length(analyticalVariables))
     print(paste("Applying", selectedAverage, "normalization on splitCol", splitCol, "and class", controlVariable))
     splitColValues <- unique(mydata[,splitCol])
     print(paste("The dataset has been split into", length(splitColValues), "subsets based on the column", splitCol))
     rowNames <- paste(analyticalVariables,"OnControlValue" ,controlValue, sep = "-" )
     logDF <- data.frame(row.names = rowNames)
-    for (value in splitColValues) {
-      splitColRows <- which(mydata[,splitCol]==value)
-      classSubset <- mydata[mydata[controlVariable] == controlValue,][splitColRows, analyticalVariables]
-      averageClassSubset <- apply(classSubset, 2, eval(parse(text=selectedAverage)), na.rm=TRUE)
-
-      #print(paste("The following", selectedAverage, "average has been calculated for each column in the class", controlVariable,
-          #        "with value", controlValue, "for the splitCol subset", value, ":"))
-      naCols <- which(is.na(averageClassSubset))
-      averageClassSubset[naCols] <- colsum[naCols]
-      logDF <- cbind(logDF,as.data.frame(averageClassSubset))
-      mydata[splitColRows,analyticalVariables] <- sapply(analyticalVariables, function(x) normalize(x, mydata[splitColRows,x], averageClassSubset))
-    }
+    listData <- lapply(splitColValues, function(value) splitColOnClassNormalize(value, mydata, splitCol,
+                                                                                selectedAverage, analyticalVariables,
+                                                                                logDF,controlValue, controlVariable, colsum))
+    logDF <- do.call(cbind,lapply(1:length(listData), function(x) return(listData[[x]]$logDF)))
+    mydata[,analyticalVariables] = do.call(rbind, lapply(1:length(listData), function(x) return(listData[[x]]$mydata)))
     splitColValues <- paste(splitCol, splitColValues, sep = ":" )
     colnames(logDF) <- splitColValues
 
@@ -105,9 +102,9 @@ dMM <- function(mydata, analyticalVariables, selectedNormalization, selectedAver
   ##################
   # Transformation #
   ##################
+  gc()
+  mallinfo::malloc.trim()
   if (selectedTransformation) {
-
-
     print("Transforming data")
     missingFieldsBefore=sum(is.na(mydata[,analyticalVariables]))
     if(!multiThreadFase){
@@ -116,9 +113,9 @@ dMM <- function(mydata, analyticalVariables, selectedNormalization, selectedAver
       skew[analyticalVariables]=apply(mydata[,analyticalVariables], 2, moments::skewness, na.rm = TRUE)
       kurto[analyticalVariables]=apply(mydata[,analyticalVariables], 2, moments::kurtosis, na.rm=TRUE)
     }
-
+    print("Transforming Skeww")
     mydata[,analyticalVariables] = mapply(transformData, mydata[,analyticalVariables], skew)
-
+    print("klaar")
     missingFieldsAfter=sum(is.na(mydata[,analyticalVariables]))
 
     if (missingFieldsBefore==missingFieldsAfter) {
@@ -137,6 +134,7 @@ dMM <- function(mydata, analyticalVariables, selectedNormalization, selectedAver
   ###################
   missingFieldsBefore=sum(is.na(mydata[,analyticalVariables]))
   # Traditional Z score standardization.
+  gc(reset=T);mallinfo::malloc.trim(pad=mem_used())
   if (selectedStandardization=='traditionalZscore'){
     print("Standardizing data with a tradition Z-score")
     mydata[,analyticalVariables]=apply(mydata[,analyticalVariables], 2, function(x) x=x+10)
@@ -163,12 +161,13 @@ dMM <- function(mydata, analyticalVariables, selectedNormalization, selectedAver
   }
 
 
-   if (removeOutliers) {
-     mydata[,analyticalVariables] <- findOutlier(mydata[,analyticalVariables], 8)
-   }
+  if (removeOutliers) {
+    mydata[,analyticalVariables] <- findOutlier(mydata[,analyticalVariables], 8)
+  }
 
 
   # Data to be returned.
-  returned <- list(mydata=mydata, kurto=kurto, skew=skew, logDMMdf=logDF)
+
+  returned <- list(mydata=mydata, kurto=kurto, skew=skew, dfNormalize=logDF)
   return(returned)
 }

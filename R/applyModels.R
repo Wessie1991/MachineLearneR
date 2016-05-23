@@ -25,55 +25,48 @@
 #' @param factors A vector containing the names of the sample-calculated factors, to be used as new analytical variables
 #' @export
 
-applyModels <- function(i, files, analyticalVariables, selectedMissingData,
+applyModels=function(i, files, analyticalVariables, selectedMissingData,
                      selectedNormalization, metaVariables, selectedTransformation,
                      selectedStandardization, splitCol, classifierClass,
-                     removeCata, factorList, faMethodScores, selectedAverage,
+                     removeCata, factorList, faMethodScores,selectedAverage,
                      removeOutliers,controlVariable,controlValue, classModel,
-                     skew, kurto,selectedTrainingSize, createPlots, factors) {
+                     skew, kurto,selectedTrainingSize,createPlots,factors){
   # i is a index for the vector containing the subsset files.
-
   load(files[i])
-
   ## Apply data manipulation model
-  print(paste("Voor DMM ", (pryr::mem_used()/1024)/1024," mb used.", sep=''))
 
   varList <- dMM(mydata=xSet, analyticalVariables = analyticalVariables, selectedNormalization=selectedNormalization,
-                   selectedAverage=selectedAverage, selectedTransformation=selectedTransformation, selectedStandardization=selectedStandardization, splitCol=splitCol,
-                   removeOutliers=removeOutliers, controlVariable=controlVariable, controlValue=controlValue, multiThreadFase=T, skew = skew, kurto = kurto)
+                 selectedAverage=selectedAverage, selectedTransformation=selectedTransformation, selectedStandardization=selectedStandardization, splitCol=splitCol,
+                 removeOutliers=removeOutliers, controlVariable=controlVariable, controlValue=controlValue, multiThreadFase=T, skew = skew, kurto = kurto)
 
-
+  print(paste("in PARA dmm ",i, (mem_used()/1024)/1024," mb used.", sep=' '))
   varList$mydata <- data.frame(varList$mydata, xSet)
   colnames( varList$mydata ) <- gsub(".1", ".raw", colnames( varList$mydata ), fixed = T)
-  rm(xSet)
-  gc()
+  rm(xSet); gc(reset=T)
   mallinfo::malloc.trim()
 
-  print(paste("Na DMM ", (pryr::mem_used()/1024)/1024," mb used.", sep=''))
-  #
-  #
-  # ## Apply multiple imputation model
+  ## Apply multiple imputation model
   if(any(is.na(varList$mydata))){
     varList$mydata <- cMIM(mydata=varList$mydata,analyticalVariables=analyticalVariables, selectedMissingData=selectedMissingData,
-                      metaVariables=metaVariables, classifierClass=classifierClass, removeCata=removeCata)
+                           metaVariables=metaVariables, classifierClass=classifierClass, removeCata=removeCata)
   }
-
-  # ## Apply factor loading model
+  rm(xSet); gc(reset=T)
+  print(paste("in PARA cMIM",i, (mem_used()/1024)/1024, "mb used.", sep=' '))
+  mallinfo::malloc.trim()
+  ## Apply factor loading model
+  #varList$mydata[,-metaVariables] <- applyFactorLoadingModel(varList$mydata[,-metaVariables], covlist=factorList$covList, solution=factorList, factorNames=factorList$factorNames)
   varList$mydata <- data.frame( varList$mydata[,metaVariables], applyFactorLoadingModel(varList$mydata[,analyticalVariables],
-                                  solution=factorList, factorNames=factorList$factorNames ,faMethodScores=faMethodScores))
-
-  print(paste("Na fa ", (pryr::mem_used()/1024)/1024," mb used.", sep=''))
-
-
-  #### Maak eeen optie om de analytical vars te onthouden defeault is false
+                                                                                        solution=factorList, factorNames=factorList$factorNames ,faMethodScores=faMethodScores))
+  gc(reset=T)
+  mallinfo::malloc.trim()
+  print(paste("in PARA FactorLoadingModel",i, (mem_used()/1024)/1024, "mb used.", sep=' '))
   colnames( varList$mydata ) <- gsub("X", "Component", colnames( varList$mydata ), fixed = T)
   analyticalVariables <- names(varList$mydata)[!(names(varList$mydata) %in% metaVariables)]
-  modelFit <- createClassModel(mydata=varList$mydata, selectedTrainingSize=selectedTrainingSize, classifierClass=classifierClass,
-                   analyticalVariables=factors ,  createPlots=createPlots, fit=classModel, parallelIter = i, cores=1, multiThreadFase=T)
+  createClassModel(mydata=varList$mydata, selectedTrainingSize=selectedTrainingSize, classifierClass=classifierClass,
+                   analyticalVariables=factors, cores=1,  createPlots=createPlots, multiThreadFase=T, fit=classModel, parallelIter = i)
 
-  print(paste("Na class ", (pryr::mem_used()/1024)/1024," mb used.", sep=''))
-
-
+  gc(reset=T)
+  mallinfo::malloc.trim()
+  print(paste("in PARA createClassModel",i, (mem_used()/1024)/1024, "mb used.", sep=' '))
 }
-
 

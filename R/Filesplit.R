@@ -12,7 +12,7 @@ Filesplit <- function(xSet, splitCol){
   fileName=paste("subset", "_", stringr::str_pad(splitnumber, 3, pad = "0"), ".Rdata", sep="")
 
   save(xSet, file=fileName)
-  rm(xSet)
+  rm(xSet);gc();mallinfo::malloc.trim()
 
   return(fileName)
 }

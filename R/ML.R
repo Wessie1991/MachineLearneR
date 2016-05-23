@@ -43,13 +43,11 @@ ML <- function(bigdata, dir=default.dir, subsetCutoff=default.subsetCutoff, spli
   #######################
   if(is.data.frame(bigdata)){
     mydata <- data.frame(bigdata)
-    rm(bigdata)
-    gc(reset=T)
+    rm(bigdata); gc(); mallinfo::malloc.trim()
   }else if (file.exists(bigdata)){
     mydata <- data.table::fread(bigdata)
     mydata <- data.frame(mydata)
-    rm(bigdata)
-    gc(reset=T)
+    rm(bigdata); gc(); mallinfo::malloc.trim()
   }else {
     stop("Invalid input, input must be a dataframe or a file.")
   }
@@ -67,9 +65,7 @@ ML <- function(bigdata, dir=default.dir, subsetCutoff=default.subsetCutoff, spli
                       controlVariable=controlVariable, classifierClass=classifierClass)
 
 
-  rm(mydata)
-  gc(reset=T)
-  mallinfo::malloc.trim()
+  rm(mydata); gc(); mallinfo::malloc.trim()
 
   ###################################
   ## Apply Data Manipulation Model ##
@@ -91,9 +87,7 @@ ML <- function(bigdata, dir=default.dir, subsetCutoff=default.subsetCutoff, spli
   skew <- list(temp$skew)
   varList['logDMMdf'] <- temp$logDMMdf
 
-  rm(temp)
-  gc(reset=T)
-  mallinfo::malloc.trim()
+  rm(temp); gc(); mallinfo::malloc.trim()
 
 
   ########################################
@@ -104,7 +98,7 @@ ML <- function(bigdata, dir=default.dir, subsetCutoff=default.subsetCutoff, spli
                              selectedMissingData=selectedMissingData,metaVariables=metaVariables,
                              classifierClass=classifierClass, removeCata=removeCata)
   }else{
-    print("No NA in Sample Dataset")
+    print("No NA's in Sample Dataset")
   }
 
 
@@ -114,6 +108,7 @@ ML <- function(bigdata, dir=default.dir, subsetCutoff=default.subsetCutoff, spli
                                    faRotate=faRotate,faMethodScores=faMethodScores, pcMethod=pcMethod, selectedCorrelationCutoff=selectedCorrelationCutoff)
 
 
+  gc(); mallinfo::malloc.trim()
   varList$samp = data.frame(varList$samp[,metaVariables], varList$samp[, !(names(varList$samp) %in% metaVariables)], factorList$mydata)
   factors <- factorList$analyticalVariables
   classModel <- createClassModel(varList$samp, selectedTrainingSize=selectedTrainingSize, classifierClass=classifierClass, analyticalVariables=factors,
@@ -128,9 +123,7 @@ ML <- function(bigdata, dir=default.dir, subsetCutoff=default.subsetCutoff, spli
   #doMC::registerDoMC(varList$cores)
   cl <- snow::makeCluster(varList$cores)
   doSNOW::registerDoSNOW(cl)
-  rm(varList)
-  gc(reset=T)
-  mallinfo::malloc.trim()
+  rm(varList); gc(); mallinfo::malloc.trim()
   require(foreach)
   parallelResult=foreach::foreach(y=seq(1:length(files))) %dopar% {
     print(paste("in PARA ", (pryr::mem_used()/1024)/1024," mb used.", sep=''))
@@ -144,6 +137,6 @@ ML <- function(bigdata, dir=default.dir, subsetCutoff=default.subsetCutoff, spli
   snow::stopCluster(cl)
 
 
-  return (T)
+  return (parallelResult)
   #return (varList)
 }

@@ -41,8 +41,7 @@ createClassModel <- function(mydata, selectedTrainingSize, classifierClass, anal
   TestSize=nrow(TestData),
   uniqueClasses=unique(TrainData[classifierClass]))
 
-  rm(mydata)
-  gc()
+  rm(mydata);gc();mallinfo::malloc.trim()
   if(!multiThreadFase){
 
     selectedIterations=ceiling(selectedTrainingIterations/cores)
@@ -92,6 +91,8 @@ createClassModel <- function(mydata, selectedTrainingSize, classifierClass, anal
   if(createPlots){
     variableImportancePlot(fit, classifierClass, analyticalVariables, parallelIter)
   }
+  rm(TestData)
+  rm(TrainData);gc();mallinfo::malloc.trim()
   return(fit)
 }
 
