@@ -12,6 +12,6 @@ ControlParameters(Parameters, bigdatanames)
 \item{bigdatanames}{A vector containing the names of al the variables in the input dataset}
 }
 \description{
-This function is used inside the ML function to check if the given input parameters are in the correct format
+This function is used inside the \code{\link{ML}} function to check if the given input parameters are in the correct format
 }
 

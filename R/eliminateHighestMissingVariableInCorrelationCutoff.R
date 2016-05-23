@@ -1,11 +1,11 @@
 #' @title  Removing the variables containing the most NA values
-#' @description This function is used internally inside the function; ExcludedVariablesModel to remove the variables from the dataset containing to many NA values.
+#' @description This function is used internally inside the function; \code{\link{ExcludedVariablesModel}} to remove the variables from the dataset containing to many NA values.
 #' @param mydata a dataframe containing the data to be analysed
 #' @param analyticalVariables A vector containing the names of the variables in the dataset that should be analysed
 #' @param selectedCorrelationCutoff A number in range 0-1 specifying the maximum ammount of correlation between variables
 #' @param removeCata A boolean indicating if categorical variables should be removed from the dataset
 #' @param corData A matrix containing information about the ammount of correlation between variables, if NULL, the function calculates this by itsself.
-
+#' @export
 
 eliminateHighestMissingVariableInCorrelationCutoff <- function(mydata, analyticalVariables,
                                                                selectedCorrelationCutoff,removeCata,

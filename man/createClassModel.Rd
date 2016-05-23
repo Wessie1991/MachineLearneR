@@ -10,7 +10,7 @@ createClassModel(mydata, selectedTrainingSize, classifierClass,
 \arguments{
 \item{mydata}{A dataframe}
 
-\item{selectedTrainingSize}{A number between 1-100, describing the size of the training set as a percentage of the total dataset. Default is 80.}
+\item{selectedTrainingSize}{A number between 1-100, describing the size of the training set as a percentage of the total dataset. Default is 80}
 
 \item{classifierClass}{A string, containing the class to classify}
 
@@ -18,11 +18,8 @@ createClassModel(mydata, selectedTrainingSize, classifierClass,
 
 \item{cores}{A number, describing the number of cores to use in parallel processing.}
 }
-\value{
-file A filename, the file contains a plot of the different variables.
-}
 \description{
-Creates a Test and a Training data set from the mydata input dataframe, and trains and applies a random forests classifier to predict the data.
+Inside the \code{\link{ML}} function this function is used to perform a random forests classification on a given data frame. It creates a Test and a Training data set from the mydata input dataframe, and trains and applies a random forests classifier to predict the data.
 }
 \examples{
 require("data.table")

@@ -21,7 +21,7 @@ cMIM(mydata, analyticalVariables, selectedMissingData, metaVariables,
 \item{removeCata}{A boolean indicating if categorical variables should be removed from the dataset}
 }
 \description{
-Inside the ML function this function is responsible for imputing the missing values in the dataset. This function can be used seperately to imputa NA values for any given dataframe.
+Inside the \code{\link{ML}} function this function is responsible for imputing the missing values in the dataset. This function can be used separately to imputa NA values for any given dataframe.
 }
 \examples{
 require("data.table")

@@ -16,6 +16,6 @@ correlationByMissing(x, listRm, mydata, analyticalVariables)
 \item{listRM}{a list containing the variables to be removed from the dataset}
 }
 \description{
-This function is used internally inside the function; eliminateHighestMissingVariableInCorrelationCutoff to find the NA values per variable
+This function is used internally inside the function; \code{\link{eliminateHighestMissingVariableInCorrelationCutoff}} to find the NA values per variable
 }
 

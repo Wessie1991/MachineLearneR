@@ -2,7 +2,7 @@
 % Please edit documentation in R/ML.R
 \name{ML}
 \alias{ML}
-\title{Main function for running the ML package}
+\title{Main function for running the MachinLearneR Process}
 \usage{
 ML(bigdata, dir = default.dir, subsetCutoff = default.subsetCutoff,
   splitCol = default.splitCol, usedCores = default.usedCores,
@@ -32,33 +32,51 @@ ML(bigdata, dir = default.dir, subsetCutoff = default.subsetCutoff,
 
 \item{subsetCutoff}{A number, specifying the minimal number of records that must be in a subset. Default is 10000}
 
-\item{splitCol}{A string, specifying the column on which the data set should be splitted.}
+\item{splitCol}{A string, specifying the column on which the data set should be splitted}
 
-\item{usedCores}{A number, specifing the number of cores to be used in parallel processing.}
+\item{usedCores}{A number, specifing the number of cores to be used in parallel processing}
 
-\item{sampleSize}{A number, in range 0-1, specifying the fraction of the mydata dataframe to be used as sample data set. Default is 0.05 (5\%).}
+\item{sampleSize}{A number, in range 0-1, specifying the fraction of the mydata dataframe to be used as sample data set. Default is 0.05 (5\%)}
 
-\item{selectedGarbageCutoff}{A number, in range 0-1, specifying the fraction of records in a variable(column) that is accepted to be NA. Default is 0.10(10\%).}
+\item{selectedGarbageCutoff}{A number, in range 0-1, specifying the fraction of records in a variable(column) that is accepted to be NA. Default is 0.10(10\%)}
 
-\item{selectedCorrelationCutoff}{A number, in range 0-1, specifying the fraction of the maximum accepted ammount of correlation between two variables.}
+\item{selectedCorrelationCutoff}{A number, in range 0-1, specifying the fraction of the maximum accepted ammount of correlation between two variables}
 
-\item{selectedMissingData}{A String, specifying the method to be used when calling the imputation model function; cMIM which should be one of the following methods:
-\itemize{
-   \item "CWD"
-   \item "impute.modus"
-   \item "impute.median"
-   \item "impute.mean"
-   \item "onclass.modus"
-   \item "onclass.median"
-   \item "onclass.mean"
-   \item "regression"
- }}
+\item{selectedMissingData}{A String, specifying the method to be used when calling the imputation model function; \code{\link{cMIM}}. Default is impute.mean}
+
+\item{classifierClass}{A string specifying the name of the variable on which the dataset should be classified}
 
 \item{removeCata}{A boolean, enabling/disabling the removal of catagorical variables(columns) from the mydata data frame. Default is TRUE, catagorical variables are removed.}
 
-\item{rm}{nnet, rpart, survival}
+\item{metaVariables}{A vector containing the names of the variables which should not be analysed, but should still remain in the dataset as describing variables}
+
+\item{selectedTransformation}{A string specifying the method for transforming the data}
+
+\item{selectedStandardization}{A string specifying the method for standardizing the data}
+
+\item{controlVariable}{A string specifying the variable on which the data should be normalized}
+
+\item{controlValue}{A string specifying the value of the controlVariable on which the data should be normalized}
+
+\item{removeOutliers}{A boolean indicating if outliers should be removed in data normalization}
+
+\item{selectedDataReductionMethod}{A string, specifying the method of data reduction to be applied, can be PCA or factor analysis}
+
+\item{selectedNumberOfDimensions}{the number of dimensions to be created, the number of produced factors. If 0, the number of dimensions is calculated by using the eigenvalues}
+
+\item{faRotate}{A string specifying the method to be used in rotation, default: oblimin}
+
+\item{faMethodScores}{A string describing the method used for calculating the factors}
+
+\item{pcMethod}{A string specifying the factoring method the be used}
+
+\item{selectedTrainingSize}{A number between 1-100, describing the size of the training set as a percentage of the total dataset. Default is 80}
 }
 \description{
-\code{ML}
+#' \code{ML} executes the entire MachineLearneR (See manual) process on any given dataset, which can be provided as data frame or as flatfile, a classifierClass should also be provided, all other parameters are optional.
+}
+\examples{
+require('MachineLearneR')
+log <- ML('/home/testData.csv',dir='/home/output/', classifierClass = 'wellname', usedCores=6)
 }
 

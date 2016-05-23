@@ -1,3 +1,6 @@
+#' @title  Create Log Dataframe For exluded variables model
+#' @description temp
+#' @export
 removedVariableDataFrame <- function(x, listdata){
   Function <- tail(listdata[x][[1]], n=1)
   var <- (listdata[x][[1]])

@@ -1,5 +1,5 @@
 #' @title Multiple Imputation
-#' @description Inside the ML function this function is responsible for imputing the missing values in the dataset. This function can be used seperately to imputa NA values for any given dataframe.
+#' @description Inside the \code{\link{ML}} function this function is responsible for imputing the missing values in the dataset. This function can be used separately to imputa NA values for any given dataframe.
 #' @param mydata a dataframe containing the data to be analysed
 #' @param analyticalVariables A vector containing the names of the variables in the dataset that should be analysed
 #' @param selectedMissingData A string specifying the method for imputing missing data
@@ -35,9 +35,6 @@ cMIM <- function(mydata, analyticalVariables,
         }
       }
 
-
-
-
       # Check if impute function is called:
       if (substring(selectedMissingData, 1, 1) == 'i'){
         print(paste("Impute missings by", strsplit(selectedMissingData,"[.]")[[1]][2],sep=' '))
@@ -45,13 +42,8 @@ cMIM <- function(mydata, analyticalVariables,
       } # Check for data deletion.
       else if (selectedMissingData == "CWD"){
         print("Missing data is removed (row wise)")
-        mydata=subset(mydata, complete.cases(mydata[,analyticalVariables])) # Omit missings (required for factor analysis)
-#         analyticalVariables=colnames(subset(mydata, select = !names(mydata) %in% metaVariables))
-#
-#         numberOfRecordsAfter=nrow(mydata[,analyticalVariables])
-#         numberOfColumnsAfter=ncol(mydata[,analyticalVariables])
-#         print(paste("Processing missing data, ", numberOfRecordsBefore-numberOfRecordsAfter, " records removed (", round(100-(100*(numberOfRecordsAfter/numberOfRecordsBefore)), 2), "%)", sep=""))
-#         print(paste("Processing missing data, ", numberOfColumnsBefore-numberOfColumnsAfter, " variables removed (", round(100-(100*(numberOfColumnsAfter/numberOfColumnsBefore)), 2), "%)", sep=""))
+        mydata=subset(mydata, complete.cases(mydata[,analyticalVariables]))
+
       }# only other method is regresion
       else if (selectedMissingData == "regression"){
         # Desmond: deze require moet weg
@@ -72,10 +64,58 @@ cMIM <- function(mydata, analyticalVariables,
         mydata[,analyticalVariables] = onclass(mydata[,analyticalVariables], classifierClass, argOnclass)
       }
 
-
-      ### colSums(mydata[,analyticalVariables], na.rm = T)
-
-
       return (mydata)
 
 }
+
+
+#' @title Imputation by mean
+#' @description Inside the \code{\link{cMIM}} function this function is responsible for imputing the missing values in the dataset by mean. This function can be used separately to impute NA values for any given vector.
+#' @param x A vector containing NA values
+#' @export
+impute.mean <- function(x){
+  return(replace(x, is.na(x), mean(x, na.rm = TRUE)))
+
+}
+
+#' @title Imputation by median
+#' @description Inside the \code{\link{cMIM}} function this function is responsible for imputing the missing values in the dataset by median. This function can be used separately to impute NA values for any given vector.
+#' @param x A vector containing NA values
+#' @export
+impute.median=function(x){
+  return(replace(x, is.na(x), median(x, na.rm = TRUE)))
+
+}
+
+#' @title Imputation by mode
+#' @description Inside the \code{\link{cMIM}} function this function is responsible for imputing the missing values in the dataset by mode. This function can be used separately to impute NA values for any given vector.
+#' @param x A vector containing NA values
+#' @export
+impute.modus <- function(x){
+  return(replace(x, is.na(x), modus(x)))
+}
+
+
+#' @title Imputation by class
+#' @description Inside the \code{\link{cMIM}} function this function is responsible for imputing the missing values in the dataset by class. This function can be used separately to impute NA values for any given data frame.
+#' @param df A data frame containing NA values
+#' @param impClass A variable on which the records should be aggregated
+#' @param func A function name, specifying the method to be used to impute the values
+#' @export
+onclass <- function(df,impClass, func){
+  ### sla deze waardes per classe op zodat deze niet opnieuw moet worden berekend
+  ### colSums(df[,analyticalVariables], na.rm = T)
+  temp <- print(zoo::na.aggregate(df, by=impClass, na.rm = T,FUN=eval(parse(text=func))))
+  return(zoo::na.aggregate(df, by=impClass, na.rm = T,FUN=eval(parse(text=func)))) # modus, mean, median.
+
+}
+
+#' @title Calculating the mode
+#' @description This function is used to calculate the mode of any given vector
+#' @param x A vector
+#' @export
+modus <- function(x){
+  return (x[which.max(tabulate(match(x, unique(x))))])
+}
+
+

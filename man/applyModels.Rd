@@ -59,6 +59,6 @@ applyModels(i, files, analyticalVariables, selectedMissingData,
 \item{factors}{A vector containing the names of the sample-calculated factors, to be used as new analytical variables}
 }
 \description{
-This function is used internally inside the ML function to apply all sample-generated models on the entire dataset
+This function is used internally inside the \code{\link{ML}} function to apply all sample-generated models on the entire dataset
 }
 

@@ -1,6 +1,5 @@
 #' @title  Function for loading input for the ML package
-#' @description
-#' \code{GetInput} checks if the mydata input is a data frame or a file, if it is a file, the function uses fread from the package data.table to read the data into a data frame. After defining the mydata data frame, this function sets the number of cores to be used during parallel processing, based on the input parameters. Based on the sampleSize parameter, the function generates a stratified sample of the mydata data frame. The function \code{\link{ExcludedVariablesModel}} is called on the sample, which reduces the number of variables(columns). The \code{\link{ExcludedVariablesModel}} function returns a Vector with columnnames that should be analyzed, analyticalVariables, which this function uses to reduce the number of variables in de mydata data frame. In parallel processing, this function then splits the (big) mydata data frame, to smaller subsets in .Rdata files by calling the \code{\link{Filesplit}} function in combination with the \code{\link[plyr]{dlply}} function.
+#' @description Inside the \code{\link{ML}} function this function is responsible for setting the number of cores to be used during parallel processing, based on the input parameters. Based on the sampleSize parameter, the function generates a stratified sample of the mydata data frame. The function \code{\link{ExcludedVariablesModel}} is called on the sample, which reduces the number of variables(columns). The \code{\link{ExcludedVariablesModel}} function returns a Vector with columnnames that should be analyzed, analyticalVariables, which this function uses to reduce the number of variables in de mydata data frame. In parallel processing, this function then splits the (big) mydata data frame, to smaller subsets in .Rdata files by calling the \code{\link{Filesplit}} function in combination with the \code{\link[plyr]{dlply}} function.
 #' @param mydata A dataframe
 #' @param dir A location specifying the working directory. This is where the .Rdata files of the subsets will be saved.
 #' @param subsetCutoff A number, specifying the minimal number of records that must be in a subset.
@@ -11,20 +10,7 @@
 #' @param selectedCorrelationCutoff A number, in range 0-1, specifying the fraction of the maximum accepted ammount of correlation between two variables.
 #' @param removeCata A boolean, enabling/disabling the removal of catagorical variables(columns) from the mydata data frame. Default is TRUE, catagorical varibiables are removed.
 #' @param metaVariables A character vector, containing the names of the variables(columns) that should NOT be analyzed, but should remain in de mydata data frame as describing variables.
-#' @return \describe{
-#' A list containing:
-#'   \item{samp}{The sample data frame}
-#'   \item{files}{the vector containing the names of the splitted .Rdata files}
-#'   \item{splitCol}{The column on which the files are splitted}
-#'   \item{analyticalVariables}{The vector containing the names of the columns to be analyzed}
-#'   \item{cores}{A number, specifing the number of cores that was used during parallel processing}
-#'   \item{garbagedf}{A data frame, containing all the variables that were removed by the \code{\link{ExcludedVariablesModel}} function.}
-#'   \item{metaVariables}{A vector, containing the updated version of the metaVariables input parameter}
-#' }
-#'
-#' @examples
-#' GetInput(mydata=bigdata,dir="dir"~/Home",subsetCutoff=10000, usedCores=8,selectedGarbageCutoff=0.2, selectedCorrelationCutoff=0.80,removeCata=FALSE, metaVariables=c("Col1",Col2","Col3"))
-
+#' @export
 
 GetInput <- function(mydata, dir, subsetCutoff,splitCol, usedCores,
                      sampleSize, selectedGarbageCutoff, selectedCorrelationCutoff, removeCata,
@@ -61,6 +47,7 @@ GetInput <- function(mydata, dir, subsetCutoff,splitCol, usedCores,
   # Generate stratafied sample
   StrataVect <- round(as.numeric(table(mydata[splitCol]) * sampleSize),0)
   mydata <- mydata[order(mydata[splitCol]),]
+  gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
   # Create sample:
   samp <- sampling::strata(mydata,stratanames = c(splitCol), size=StrataVect,
                            method = "srswr")
@@ -74,7 +61,7 @@ GetInput <- function(mydata, dir, subsetCutoff,splitCol, usedCores,
   x <- append(garbageList$analyticalVariables, metaVariables)
   samp <- samp[,x]
   mydata <- mydata[,x]
-
+  gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
   # Split the files parallel.
   #doMC::registerDoMC(cores=cores)
   cl <- snow::makeCluster(cores)
@@ -85,9 +72,24 @@ GetInput <- function(mydata, dir, subsetCutoff,splitCol, usedCores,
                      garbagedf=garbageList$garbageDf, metaVariables=metaVariables, colSumsBigdata=colSums(mydata[,garbageList$analyticalVariables],na.rm=T))
   return(returnList)
 
-
-
 }
 
+#' @title  Writing data frame subsets to an .Rdata File
+#' @description This function is used inside the \code{\link{GetInput}} function to split a data frame into subsets by using \code{\link[plyr]{dlply}}.\code{Filesplit} generates a number, based on the splitCol parameter, which it uses to create an .Rdata file of the input data frame, xSet, which it saves.
+#' @param xSet A dataframe
+#' @param splitCol A String, specifying a column of the xSet dataframe, which is used to generate the filename.
+#' @examples FileSplit(mydata, splitCol="Col1")
+#' @export
+Filesplit <- function(xSet, splitCol){
+
+  splitnumber=xSet[1, splitCol]
+
+  fileName=paste("subset", "_", stringr::str_pad(splitnumber, 3, pad = "0"), ".Rdata", sep="")
+
+  save(xSet, file=fileName)
+  rm(xSet);gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
+
+  return(fileName)
+}
 
 

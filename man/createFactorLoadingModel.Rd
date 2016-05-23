@@ -15,6 +15,8 @@ createFactorLoadingModel(mydata, analyticalVariables,
 
 \item{selectedNumberOfDimensions}{the number of dimensions to be created, the number of produced factors. If 0, the number of dimensions is calculated by using the eigenvalues}
 
+\item{selectedDataReductionMethod}{A string, specifying the method of data reduction to be applied, can be PCA or factor analysis}
+
 \item{removeCata}{A boolean indicating if categorical variables should be removed from the dataset}
 
 \item{faRotate}{A string specifying the method to be used in rotation, default: oblimin}
@@ -26,7 +28,7 @@ createFactorLoadingModel(mydata, analyticalVariables,
 \item{selectedCorrelationCutoff}{A number in range 0-1 specifying the maximum ammount of correlation between variables}
 }
 \description{
-Inside the ML function this function creates a factor loading model, in order to reduce the ammount of dimensions from the original dataset. This function can be used seperately to generate a factor loading model for any given dataframe
+Inside the \code{\link{ML}} function this function creates a factor loading model, in order to reduce the ammount of dimensions from the original dataset. This function can be used separately to generate a factor loading model for any given dataframe
 }
 \examples{
 require("data.table")

@@ -1,8 +1,9 @@
 #' @title  Creating the factor loading model
-#' @description Inside the ML function this function creates a factor loading model, in order to reduce the ammount of dimensions from the original dataset. This function can be used seperately to generate a factor loading model for any given dataframe
+#' @description Inside the \code{\link{ML}} function this function creates a factor loading model, in order to reduce the ammount of dimensions from the original dataset. This function can be used separately to generate a factor loading model for any given dataframe
 #' @param mydata a dataframe containing the data to be analysed
 #' @param analyticalVariables A vector containing the names of the variables in the dataset that should be analysed
 #' @param selectedNumberOfDimensions the number of dimensions to be created, the number of produced factors. If 0, the number of dimensions is calculated by using the eigenvalues
+#' @param selectedDataReductionMethod A string, specifying the method of data reduction to be applied, can be PCA or factor analysis
 #' @param removeCata A boolean indicating if categorical variables should be removed from the dataset
 #' @param faRotate A string specifying the method to be used in rotation, default: oblimin
 #' @param faMethodScores A string describing the method used for calculating the factors
@@ -78,3 +79,14 @@ createFactorLoadingModel <- function(mydata , analyticalVariables, selectedNumbe
 
   return(factorList)
 }
+
+renameColNames <- function(numberOfFactors){
+  factorNames <- c()
+  numberOfPlaces <- nchar(as.character(numberOfFactors))
+  for (f in 1:numberOfFactors) {
+    numberCol <- stringr::str_pad(as.character(f), width = numberOfPlaces, pad = "0")
+    factorNames=c(factorNames, paste("Component", numberCol, sep=""))
+  }
+  return(factorNames)
+}
+

@@ -16,6 +16,6 @@ applyFactorLoadingModel(mydata, solution, factorNames, faMethodScores)
 \item{faMethodScores}{A string describing the method used for calculating the factors}
 }
 \description{
-This function is used internally for applying the factor loading model inside the function; applyModels
+This function is used internally for applying the factor loading model inside the function; \code{\link{applyModels}}
 }
 

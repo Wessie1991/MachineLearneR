@@ -19,6 +19,6 @@ eliminateHighestMissingVariableInCorrelationCutoff(mydata, analyticalVariables,
 \item{corData}{A matrix containing information about the ammount of correlation between variables, if NULL, the function calculates this by itsself.}
 }
 \description{
-This function is used internally inside the function; ExcludedVariablesModel to remove the variables from the dataset containing to many NA values.
+This function is used internally inside the function; \code{\link{ExcludedVariablesModel}} to remove the variables from the dataset containing to many NA values.
 }
 

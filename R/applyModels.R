@@ -1,5 +1,5 @@
 #' @title  Applying all MachineLearneR models in parallel
-#' @description This function is used internally inside the ML function to apply all sample-generated models on the entire dataset
+#' @description This function is used internally inside the \code{\link{ML}} function to apply all sample-generated models on the entire dataset
 #' @param i An integer, specifying nth parallel iteration
 #' @param files A vector containing the filenames of the subsets
 #' @param analyticalVariables A vector containing the names of the variables in the dataset that should be analysed
@@ -34,39 +34,37 @@ applyModels=function(i, files, analyticalVariables, selectedMissingData,
   # i is a index for the vector containing the subsset files.
   load(files[i])
   ## Apply data manipulation model
-
   varList <- dMM(mydata=xSet, analyticalVariables = analyticalVariables, selectedNormalization=selectedNormalization,
                  selectedAverage=selectedAverage, selectedTransformation=selectedTransformation, selectedStandardization=selectedStandardization, splitCol=splitCol,
                  removeOutliers=removeOutliers, controlVariable=controlVariable, controlValue=controlValue, multiThreadFase=T, skew = skew, kurto = kurto)
 
-  print(paste("in PARA dmm ",i, (mem_used()/1024)/1024," mb used.", sep=' '))
+  print(paste("in PARA dmm ",i, (pryr::mem_used()/1024)/1024," mb used.", sep=' '))
+
   varList$mydata <- data.frame(varList$mydata, xSet)
   colnames( varList$mydata ) <- gsub(".1", ".raw", colnames( varList$mydata ), fixed = T)
-  rm(xSet); gc(reset=T)
-  mallinfo::malloc.trim()
+
+  rm(xSet); gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
 
   ## Apply multiple imputation model
   if(any(is.na(varList$mydata))){
     varList$mydata <- cMIM(mydata=varList$mydata,analyticalVariables=analyticalVariables, selectedMissingData=selectedMissingData,
                            metaVariables=metaVariables, classifierClass=classifierClass, removeCata=removeCata)
   }
-  rm(xSet); gc(reset=T)
-  print(paste("in PARA cMIM",i, (mem_used()/1024)/1024, "mb used.", sep=' '))
-  mallinfo::malloc.trim()
-  ## Apply factor loading model
-  #varList$mydata[,-metaVariables] <- applyFactorLoadingModel(varList$mydata[,-metaVariables], covlist=factorList$covList, solution=factorList, factorNames=factorList$factorNames)
+
+  rm(xSet); gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
+  print(paste("in PARA cMIM",i, (pryr::mem_used()/1024)/1024, "mb used.", sep=' '))
+
   varList$mydata <- data.frame( varList$mydata[,metaVariables], applyFactorLoadingModel(varList$mydata[,analyticalVariables],
                                                                                         solution=factorList, factorNames=factorList$factorNames ,faMethodScores=faMethodScores))
-  gc(reset=T)
-  mallinfo::malloc.trim()
-  print(paste("in PARA FactorLoadingModel",i, (mem_used()/1024)/1024, "mb used.", sep=' '))
+  gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
+  print(paste("in PARA FactorLoadingModel",i, (pryr::mem_used()/1024)/1024, "mb used.", sep=' '))
+
   colnames( varList$mydata ) <- gsub("X", "Component", colnames( varList$mydata ), fixed = T)
   analyticalVariables <- names(varList$mydata)[!(names(varList$mydata) %in% metaVariables)]
   createClassModel(mydata=varList$mydata, selectedTrainingSize=selectedTrainingSize, classifierClass=classifierClass,
                    analyticalVariables=factors, cores=1,  createPlots=createPlots, multiThreadFase=T, fit=classModel, parallelIter = i)
 
-  gc(reset=T)
-  mallinfo::malloc.trim()
-  print(paste("in PARA createClassModel",i, (mem_used()/1024)/1024, "mb used.", sep=' '))
+  gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
+  print(paste("in PARA createClassModel",i, (pryr::mem_used()/1024)/1024, "mb used.", sep=' '))
 }
 

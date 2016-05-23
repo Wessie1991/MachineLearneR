@@ -2,7 +2,7 @@
 % Please edit documentation in R/ExcludedVariablesModel.R
 \name{ExcludedVariablesModel}
 \alias{ExcludedVariablesModel}
-\title{Function for reducing the number of variables(columns) in a data frame}
+\title{Reducing the number of variables}
 \usage{
 ExcludedVariablesModel(mydata, analyticalVariables, selectedGarbageCutoff,
   selectedCorrelationCutoff, removeCata)
@@ -11,8 +11,20 @@ ExcludedVariablesModel(mydata, analyticalVariables, selectedGarbageCutoff,
 \item{mydata}{a dataframe containing the data to be analysed}
 
 \item{analyticalVariables}{A vector containing the names of the variables in the dataset that should be analysed}
+
+\item{selectedGarbageCutoff}{A number in range 0-1 specifying the maximum ammount of missing values a variable is allowed to contain}
+
+\item{selectedCorrelationCutoff}{A number in range 0-1 specifying the maximum ammount of correlation between variables}
+
+\item{removeCata}{A boolean indicating if categorical variables should be removed from the dataset}
 }
 \description{
-blabalba
+@description Inside the \code{\link{ML}} function this function is responsible for reducing the number of variables(columns) in the dataset by removing irrelevant variables. This function can be used separately to reduce the ammount of variables in any given data frame.
+}
+\examples{
+require("data.table")
+data <- fread("data.csv")
+data <- data.frame(data)
+ExcludedVariablesModel(mydata=data, analyticalVariables=c("var1", "var2"), selectedGarbageCutoff=0.2, selectedCorrelationCutoff=0.90, removeCata=T)
 }
 

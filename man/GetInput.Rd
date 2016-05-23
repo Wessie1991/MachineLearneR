@@ -29,22 +29,7 @@ GetInput(mydata, dir, subsetCutoff, splitCol, usedCores, sampleSize,
 
 \item{metaVariables}{A character vector, containing the names of the variables(columns) that should NOT be analyzed, but should remain in de mydata data frame as describing variables.}
 }
-\value{
-\describe{
-A list containing:
-  \item{samp}{The sample data frame}
-  \item{files}{the vector containing the names of the splitted .Rdata files}
-  \item{splitCol}{The column on which the files are splitted}
-  \item{analyticalVariables}{The vector containing the names of the columns to be analyzed}
-  \item{cores}{A number, specifing the number of cores that was used during parallel processing}
-  \item{garbagedf}{A data frame, containing all the variables that were removed by the \code{\link{ExcludedVariablesModel}} function.}
-  \item{metaVariables}{A vector, containing the updated version of the metaVariables input parameter}
-}
-}
 \description{
-\code{GetInput} checks if the mydata input is a data frame or a file, if it is a file, the function uses fread from the package data.table to read the data into a data frame. After defining the mydata data frame, this function sets the number of cores to be used during parallel processing, based on the input parameters. Based on the sampleSize parameter, the function generates a stratified sample of the mydata data frame. The function \code{\link{ExcludedVariablesModel}} is called on the sample, which reduces the number of variables(columns). The \code{\link{ExcludedVariablesModel}} function returns a Vector with columnnames that should be analyzed, analyticalVariables, which this function uses to reduce the number of variables in de mydata data frame. In parallel processing, this function then splits the (big) mydata data frame, to smaller subsets in .Rdata files by calling the \code{\link{Filesplit}} function in combination with the \code{\link[plyr]{dlply}} function.
-}
-\examples{
-GetInput(mydata=bigdata,dir="dir"~/Home",subsetCutoff=10000, usedCores=8,selectedGarbageCutoff=0.2, selectedCorrelationCutoff=0.80,removeCata=FALSE, metaVariables=c("Col1",Col2","Col3"))
+Inside the \code{\link{ML}} function this function is responsible for setting the number of cores to be used during parallel processing, based on the input parameters. Based on the sampleSize parameter, the function generates a stratified sample of the mydata data frame. The function \code{\link{ExcludedVariablesModel}} is called on the sample, which reduces the number of variables(columns). The \code{\link{ExcludedVariablesModel}} function returns a Vector with columnnames that should be analyzed, analyticalVariables, which this function uses to reduce the number of variables in de mydata data frame. In parallel processing, this function then splits the (big) mydata data frame, to smaller subsets in .Rdata files by calling the \code{\link{Filesplit}} function in combination with the \code{\link[plyr]{dlply}} function.
 }
 

@@ -36,7 +36,7 @@ dMM(mydata, analyticalVariables, selectedNormalization, selectedAverage,
 \item{skew}{A list containing the sample-calculated skewness per variable, only required if multiThreadFase=TRUE}
 }
 \description{
-Inside the ML function this function is responsible for manipulating the data in the dataset. This function can be used seperately to manipulate data for any given dataframe.
+Inside the \code{\link{ML}} function this function is responsible for manipulating the data in the dataset. This function can be used separately to manipulate data for any given dataframe.
 }
 \examples{
 require("data.table")

@@ -1,5 +1,5 @@
 #' @title  Data manipulation
-#' @description Inside the ML function this function is responsible for manipulating the data in the dataset. This function can be used seperately to manipulate data for any given dataframe.
+#' @description Inside the \code{\link{ML}} function this function is responsible for manipulating the data in the dataset. This function can be used separately to manipulate data for any given dataframe.
 #' @param mydata a dataframe containing the data to be analysed
 #' @param analyticalVariables A vector containing the names of the variables in the dataset that should be analysed
 #' @param selectedNormalization A string specifying the method for normalizing the data
@@ -18,9 +18,7 @@
 #' data <- fread("data.csv")
 #' data <- data.frame(data)
 #' dMM(mydata=data, analyticalVariables=c("var1", "var2"), selectedNormalization=normalize.onClass, controlVariable='var2', controlValue=22, splitCol='var1')
-
-
-
+#' @export
 dMM <- function(mydata, analyticalVariables, selectedNormalization, selectedAverage,
                 selectedTransformation, selectedStandardization, removeOutliers,
                 splitCol, controlVariable, controlValue, multiThreadFase, kurto, skew)
@@ -34,9 +32,8 @@ dMM <- function(mydata, analyticalVariables, selectedNormalization, selectedAver
   # als deze niet in analyticalVariables zitten.
   colsum <- colSums(mydata[,analyticalVariables])
   missingFieldsBefore=sum(is.na(mydata[,analyticalVariables]))
-  gc()
-  mallinfo::malloc.trim()
-  print(paste("in de manupulatie", (mem_used()/1024)/1024, "mb used.", sep=' '))
+  gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
+  print(paste("in de manupulatie", (pryr::mem_used()/1024)/1024, "mb used.", sep=' '))
   if (selectedNormalization=="normalize") {
     print(paste("Applying", selectedAverage, "normalization."))
     averageData <- apply(mydata[,analyticalVariables], 2, eval(parse(text=selectedAverage)), na.rm=TRUE)
@@ -102,8 +99,7 @@ dMM <- function(mydata, analyticalVariables, selectedNormalization, selectedAver
   ##################
   # Transformation #
   ##################
-  gc()
-  mallinfo::malloc.trim()
+  gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
   if (selectedTransformation) {
     print("Transforming data")
     missingFieldsBefore=sum(is.na(mydata[,analyticalVariables]))
@@ -134,7 +130,7 @@ dMM <- function(mydata, analyticalVariables, selectedNormalization, selectedAver
   ###################
   missingFieldsBefore=sum(is.na(mydata[,analyticalVariables]))
   # Traditional Z score standardization.
-  gc(reset=T);mallinfo::malloc.trim(pad=mem_used())
+  gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
   if (selectedStandardization=='traditionalZscore'){
     print("Standardizing data with a tradition Z-score")
     mydata[,analyticalVariables]=apply(mydata[,analyticalVariables], 2, function(x) x=x+10)
@@ -160,14 +156,79 @@ dMM <- function(mydata, analyticalVariables, selectedNormalization, selectedAver
     }
   }
 
-
   if (removeOutliers) {
     mydata[,analyticalVariables] <- findOutlier(mydata[,analyticalVariables], 8)
   }
 
-
-  # Data to be returned.
-
   returned <- list(mydata=mydata, kurto=kurto, skew=skew, dfNormalize=logDF)
   return(returned)
 }
+
+
+#' @title Normalizing data the data
+#' @description Inside the \code{\link{dMM}} function this function is responsible for normalizing the dataset.
+#' @param currentVariable temp
+#' @param currentVariableValues temp
+#' @param averageData temp
+#' @export
+normalize <- function(currentVariable, currentVariableValues, averageData) {
+  subset <- which(names(averageData)==currentVariable)
+  normalizedData <- currentVariableValues/averageData[subset]
+  return(normalizedData)
+}
+
+#' @title Checking the range of a vector
+#' @description temp
+#' @param x A vector
+#' @export
+range01 <- function(x){
+  return(x-min(x, na.rm=TRUE))/(max(x, na.rm=TRUE)-min(x, na.rm=TRUE))
+}
+
+#' @title Transforming data the data
+#' @description Inside the \code{\link{dMM}} function this function is responsible for log transforming the variables based on their skewness.
+#' @param x A vector
+#' @param skew A vector
+#' @export
+transformData = function(x, skew) {
+  gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
+  if(!is.na(skew)){
+    if (skew>5.00) {
+      return(log(range01(x)+1))
+    } else if (skew<5.00) {
+      return(sqrt(range01(x)+1))
+    }
+  }
+  return(x)
+}
+
+#' @title  RobustZscore standardisation.
+#' @description Inside the \code{\link{dMM}} function this function is responsible for standardizing the variables based on their robust Z score.
+#' @param x A vector
+#' @export
+robustZscore=function (x) {
+  meanAD=function (x) {
+    mean=mean(x, na.rm=TRUE)
+    y=mean(abs((x-mean)), na.rm=TRUE)
+    return(y)
+  }
+
+  med <- median(x,na.rm=TRUE)
+  nas<-sum(!is.na(x))
+  if (nas !=0){
+    mad = mad(x, na.rm=TRUE)
+  }
+  else {
+    mad=0
+  }
+
+  meanADscore <- meanAD(x)
+
+  if (mad==0) {
+    y <- (x-med)/(1.253314*meanADscore)
+  } else {
+    y <- (x-med)/(1.4826*mad)
+  }
+  return(as.matrix(y))
+}
+

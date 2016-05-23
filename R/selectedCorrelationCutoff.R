@@ -1,8 +1,10 @@
+#' @title  Filtering on correlation
+#' @description temp
+#' @export
 correlationCutoffFilter=function(x, corData,
                                  selectedCorrelationCutoff) {
 
-  if(sum(abs(as.numeric(corData[,x]))>=selectedCorrelationCutoff)>1) { # standaard 0.99 deze cuttof
-
+  if(sum(abs(as.numeric(corData[,x]))>=selectedCorrelationCutoff)>1) {
     rowNames <- row.names(corData[(corData[,x]>selectedCorrelationCutoff), ])
     return(rowNames)
 
@@ -10,4 +12,3 @@ correlationCutoffFilter=function(x, corData,
 }
 
 
-#

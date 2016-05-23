@@ -1,3 +1,6 @@
+#' @title  Finding Outliers
+#' @description temp
+#' @export
 findOutlier <- function(mydata, cutoff) {
   ## Calculate the sd
   sds <- apply(mydata, 2, sd, na.rm = TRUE)
@@ -9,6 +12,9 @@ findOutlier <- function(mydata, cutoff) {
   return(mydata.Outlier.Removed)
 }
 
+#' @title  removing Outliers
+#' @description temp
+#' @export
 removeOutlier <- function(mydata, outliers) {
   result <- mapply(function(d, o) {
     res <- d

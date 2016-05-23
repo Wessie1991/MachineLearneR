@@ -1,3 +1,5 @@
+#' @title  Update Correlation matrix
+#' @export
 updateCorrelationVariable <- function(x, corData, mydata, countRow){
   i <- which(colnames(corData)==x)
   data <- as.numeric(mydata[,x])

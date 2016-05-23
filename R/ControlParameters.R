@@ -1,9 +1,8 @@
 #' @title  Checking parameters
-#' @description This function is used inside the ML function to check if the given input parameters are in the correct format
+#' @description This function is used inside the \code{\link{ML}} function to check if the given input parameters are in the correct format
 #' @param Parameters A vector containing the names of al the parameters used inside the ML function
 #' @param bigdatanames A vector containing the names of al the variables in the input dataset
 #' @export
-
 ControlParameters <- function(Parameters, bigdatanames){
   if(!file_test("-d", Parameters[1][[1]])) stop("Provided directory doesn't exist")
   noCheck <- c("splitCol", 'metaVariables', 'classifierClass','controlVariable','controlValue','dir')
