@@ -25,19 +25,15 @@
 #' @param factors A vector containing the names of the sample-calculated factors, to be used as new analytical variables
 #' @export
 
-applyModels=function(i, files, analyticalVariables, selectedMissingData,
-                     selectedNormalization, metaVariables, selectedTransformation,
-                     selectedStandardization, splitCol, classifierClass,
-                     removeCata, factorList, faMethodScores,selectedAverage,
-                     removeOutliers,controlVariable,controlValue, classModel,
-                     skew, kurto,selectedTrainingSize,createPlots,factors){
+applyModels=function(i){
+  print(paste("in PARA ", (pryr::mem_used()/1024)/1024," mb used.", sep=''))
   # i is a index for the vector containing the subsset files.
   load(files[i])
   ## Apply data manipulation model
   varList <- dMM(mydata=xSet, analyticalVariables = analyticalVariables, selectedNormalization=selectedNormalization,
                  selectedAverage=selectedAverage, selectedTransformation=selectedTransformation, selectedStandardization=selectedStandardization, splitCol=splitCol,
                  removeOutliers=removeOutliers, controlVariable=controlVariable, controlValue=controlValue, multiThreadFase=T, skew = skew, kurto = kurto)
-
+  
   print(paste("in PARA dmm ",i, (pryr::mem_used()/1024)/1024," mb used.", sep=' '))
 
   varList$mydata <- data.frame(varList$mydata, xSet)
@@ -68,3 +64,9 @@ applyModels=function(i, files, analyticalVariables, selectedMissingData,
   print(paste("in PARA createClassModel",i, (pryr::mem_used()/1024)/1024, "mb used.", sep=' '))
 }
 
+# , files, analyticalVariables, selectedMissingData,
+# selectedNormalization, metaVariables, selectedTransformation,
+# selectedStandardization, splitCol, classifierClass,
+# removeCata, factorList, faMethodScores,selectedAverage,
+# removeOutliers,controlVariable,controlValue, classModel,
+# skew, kurto,selectedTrainingSize,createPlots,factors

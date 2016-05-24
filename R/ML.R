@@ -44,8 +44,7 @@ ML <- function(bigdata, dir=default.dir, subsetCutoff=default.subsetCutoff, spli
     mydata <- data.frame(bigdata)
     rm(bigdata); gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
   }else if (file.exists(bigdata)){
-    mydata <- data.table::fread(bigdata)
-    mydata <- data.frame(mydata)
+    mydata <- data.frame(data.table::fread(bigdata))
     rm(bigdata); gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
   }else {
     stop("Invalid input, input must be a dataframe or a file.")
@@ -67,7 +66,7 @@ ML <- function(bigdata, dir=default.dir, subsetCutoff=default.subsetCutoff, spli
   rm(mydata); gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
 
   ###################################
-  ## Apply Data Manipulation Model ##
+  ## AclusterExportpply Data Manipulation Model ##
   ###################################
   analyticalVariables <- varList$analyticalVariables
   metaVariables <- varList$metaVariables
@@ -114,17 +113,19 @@ ML <- function(bigdata, dir=default.dir, subsetCutoff=default.subsetCutoff, spli
                            cores=varList$cores, createPlots = createPlots, parallelIter='sample',multiThreadFase=F)
 
 
-
+  print("waarom zo ")
   ################################
   # Thread package on all data ##
   ################################
 
-  #doMC::registerDoMC(varList$cores)
-  cl <- snow::makeCluster(varList$cores, outfile="parralleloutput.txt")
+  doMC::registerDoMC(varList$cores)
+  cl <- snow::makeCluster(varList$cores, outfile="", type = "SOCK")
   doSNOW::registerDoSNOW(cl)
   rm(varList); gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
+  print(paste("in Voor PARA ", (pryr::mem_used()/1024)/1024," mb used.", sep=''))
+  print(ls())
   require(foreach)
-  parallelResult=foreach::foreach(y=seq(1:length(files))) %dopar% {
+  parallelResult=foreach::foreach(y=seq(1:length(files))) %do% {
     print(paste("in PARA ", (pryr::mem_used()/1024)/1024," mb used.", sep=''))
     applyModels(y,files, analyticalVariables, selectedMissingData,
       selectedNormalization, metaVariables, selectedTransformation,
@@ -134,8 +135,32 @@ ML <- function(bigdata, dir=default.dir, subsetCutoff=default.subsetCutoff, spli
       skew, kurto,selectedTrainingSize,createPlots,factors)
   }
   snow::stopCluster(cl)
+  
+  # require(snowfall)
+  # print(paste("in Voor PARA ", (pryr::mem_used()/1024)/1024," mb used.", sep=''))
+  # sfInit(parallel=F, cpus=varList$cores)
+  # # ## haal dit weg
+  # # # import library
+  # snowfall::sfLibrary(zoo)
+  # snowfall::sfLibrary(mice)
+  # snowfall::sfLibrary(ML)
+  # snowfall::sfLibrary(psych)
+  # snowfall::sfLibrary(robustfa)
+  # snowfall::sfLibrary(rrcov)
+  # snowfall::sfLibrary(randomForest)
+  # snowfall::sfExport("files", "analyticalVariables", "selectedMissingData",
+  #                                      "selectedNormalization", "metaVariables", "selectedTransformation",
+  #                                      "selectedStandardization", "splitCol", "classifierClass",
+  #                                      "removeCata", "factorList", "faMethodScores", "selectedAverage",
+  #                                      "removeOutliers","controlVariable","controlValue", "classModel",
+  #                                      "skew", "kurto","selectedTrainingSize","createPlots","factors")
+  # 
+  # # apply supervised learning model to dataset
+  # snowfall::sfLapply(1:length(files), applyModels)
+  # sfStop()
 
-
+  
+  
   return (parallelResult)
   #return (varList)
 }

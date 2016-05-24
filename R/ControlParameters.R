@@ -8,7 +8,7 @@ ControlParameters <- function(Parameters, bigdatanames){
   noCheck <- c("splitCol", 'metaVariables', 'classifierClass','controlVariable','controlValue','dir')
   lapply(head(noCheck, -1), function(x) if(!is.null(Parameters[x][[1]])) if(
     !Parameters[x][[1]] %in% bigdatanames) stop(paste("Given ", x, " not in the dataset!")))
-  if(length(Parameters['classifierClass']) == 0) stop("No classifier class was given")
+  if(is.null(Parameters['classifierClass'][[1]])) stop("No classifier class was given")
   for(i in (names(Parameters)[!(names(Parameters) %in% noCheck)])){
     Param <- names(Parameters[i])
     default <- eval(parse(text=paste("default", Param, sep='.')))

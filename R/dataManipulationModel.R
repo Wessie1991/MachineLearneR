@@ -32,11 +32,11 @@ dMM <- function(mydata, analyticalVariables, selectedNormalization, selectedAver
   # als deze niet in analyticalVariables zitten.
   colsum <- colSums(mydata[,analyticalVariables])
   missingFieldsBefore=sum(is.na(mydata[,analyticalVariables]))
-  gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
+    gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
   print(paste("in de manupulatie", (pryr::mem_used()/1024)/1024, "mb used.", sep=' '))
   if (selectedNormalization=="normalize") {
     print(paste("Applying", selectedAverage, "normalization."))
-    averageData <- apply(mydata[,analyticalVariables], 2, eval(parse(text=selectedAverage)), na.rm=TRUE)
+    averageData <- plyr::aaply(mydata[,analyticalVariables],2,  function(x) eval(parse(text=paste(selectedAverage, "(x[,1], na.rm=TRUE)", sep=""))))
     #print(paste("The following", selectedAverage, "average has been calculated for each column:"))
     #print(paste(analyticalVariables, ":", averageData))
     mydata[,analyticalVariables] <- sapply(analyticalVariables, function(x) normalize(x, mydata[,x], averageData))

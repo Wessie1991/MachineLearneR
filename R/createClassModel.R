@@ -11,6 +11,8 @@
 #' data <- data.frame(data)
 #' classModel(mydata=data, selectedTrainingSize = 90,classifierClass="ExampleClass", analyticalVariables = names(mydata), cores=6)
 #' classModel(mydata=data, classifierClass="ExampleClass", analyticalVariables = names(mydata), cores=8)
+#' @importFrom foreach %dopar%
+#' @import randomForest 
 #' @export
 createClassModel <- function(mydata, selectedTrainingSize, classifierClass, analyticalVariables , cores, createPlots,
                              multiThreadFase, fit, parallelIter)
@@ -53,7 +55,6 @@ createClassModel <- function(mydata, selectedTrainingSize, classifierClass, anal
     }
     doMC::registerDoMC(cores)
     require(foreach)
-
     fit=foreach::foreach(y=seq(cores), .combine=randomForest::combine, .packages='randomForest') %dopar% {
           set.seed(y) # not really needed
           rf=randomForest::randomForest(TrainData[,analyticalVariables],as.factor(TrainData[,classifierClass]),
@@ -62,8 +63,8 @@ createClassModel <- function(mydata, selectedTrainingSize, classifierClass, anal
   }
 
   print("Testing accuracy Random Forest model")
-  TestData$prediction=predict(fit, TestData)
-  TestData$probability=predict(fit, TestData, type='prob')
+  TestData$prediction=randomForest:::predict.randomForest(fit, TestData)
+  TestData$probability=randomForest:::predict.randomForest(fit, TestData, type='prob')
   print(paste("Percentage Correct Predictions TestData (", round(length(which(TestData[,classifierClass] == TestData$prediction)
                                   ) / nrow(TestData) * 100 , 3), "%)", sep=""))
 

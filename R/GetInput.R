@@ -64,9 +64,9 @@ GetInput <- function(mydata, dir, subsetCutoff,splitCol, usedCores,
   gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
   # Split the files parallel.
   #doMC::registerDoMC(cores=cores)
-  cl <- snow::makeCluster(cores)
+  cl <- snow::makeCluster(cores, outfile="")
   doSNOW::registerDoSNOW(cl)
-  files <- as.character(plyr::dlply(mydata, match(splitCol, names(mydata)), Filesplit, splitCol, .parallel = TRUE))
+  files <- as.character(plyr::dlply(mydata, match(splitCol, names(mydata)), Filesplit, splitCol, .parallel = T))
   snow::stopCluster(cl)
   returnList <- list(samp=samp,files=files,splitCol=splitCol,analyticalVariables=garbageList$analyticalVariables,cores=cores,
                      garbagedf=garbageList$garbageDf, metaVariables=metaVariables, colSumsBigdata=colSums(mydata[,garbageList$analyticalVariables],na.rm=T))
@@ -83,9 +83,8 @@ GetInput <- function(mydata, dir, subsetCutoff,splitCol, usedCores,
 Filesplit <- function(xSet, splitCol){
 
   splitnumber=xSet[1, splitCol]
-
   fileName=paste("subset", "_", stringr::str_pad(splitnumber, 3, pad = "0"), ".Rdata", sep="")
-
+  print(class(xSet))
   save(xSet, file=fileName)
   rm(xSet);gc(reset=T);mallinfo::malloc.trim(pad=pryr::mem_used())
 
