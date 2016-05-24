@@ -7,7 +7,7 @@
 #' @export
 applyFactorLoadingModel <- function(mydata, solution, factorNames, faMethodScores){
   mydataMatrix <- as.matrix(mydata)
-#sdfsdf
+  #ik Ben desmond
   covx <- rrcov::Cov(mydataMatrix)
 
   covList <- list(cov = rrcov::getCov(covx), center = rrcov::getCenter(covx))
